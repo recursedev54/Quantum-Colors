@@ -1,0 +1,53 @@
+import tkinter as tk
+from tkinter import Canvas
+import numpy as np
+from PIL import Image, ImageTk
+
+# Function to convert normalized RGB values to hex
+def rgb_to_hex(r, g, b):
+    return '#{:02x}{:02x}{:02x}'.format(int(r * 255), int(g * 255), int(b * 255))
+
+# Generate the color gradient image
+width, height = 300, 300
+gradient = np.zeros((height, width, 3), dtype=np.uint8)
+
+for i in range(height):
+    for j in range(width):
+        r = int(255 * (j / width))
+        g = int(255 * (i / height))
+        b = int(255 * ((i + j) / (2 * width)))
+        gradient[i, j] = [r, g, b]
+
+# Convert the gradient to an image
+gradient_image = Image.fromarray(gradient)
+
+# Create the tkinter window
+root = tk.Tk()
+root.title("Interactive Color Gradient")
+
+# Convert the gradient to a PhotoImage after the root window is created
+gradient_photo = ImageTk.PhotoImage(gradient_image)
+
+# Create a canvas to display the gradient
+canvas = Canvas(root, width=width, height=height)
+canvas.pack()
+
+# Add the gradient image to the canvas
+canvas.create_image(0, 0, anchor=tk.NW, image=gradient_photo)
+
+# Create a label to display the hex color value
+hex_label = tk.Label(root, text="Click on the gradient to see the hex color value", font=("Arial", 16))
+hex_label.pack(pady=20)
+
+# Define the callback function for mouse clicks
+def on_click(event):
+    x, y = event.x, event.y
+    r, g, b = gradient[y, x]
+    hex_color = rgb_to_hex(r/255, g/255, b/255)
+    hex_label.config(text=f"Hex Color: {hex_color}")
+
+# Bind the click event to the canvas
+canvas.bind("<Button-1>", on_click)
+
+# Run the tkinter main loop
+root.mainloop()
